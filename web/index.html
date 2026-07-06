@@ -260,6 +260,8 @@
   $("prompt").addEventListener("keydown", (e) => {
     if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) generate();
   });
+  // ?autorun=1 : lance une génération au chargement (démos, captures d'écran).
+  if (new URLSearchParams(location.search).has("autorun")) generate();
 </script>
 
 </body>

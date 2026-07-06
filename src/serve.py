@@ -20,6 +20,7 @@ import argparse
 import json
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+from urllib.parse import urlparse
 
 import torch
 
@@ -60,14 +61,16 @@ def make_handler(model, tokenizer, meta: dict):
             self.wfile.write(body)
 
         def do_GET(self) -> None:
-            if self.path in ("/", "/index.html"):
+            # urlparse : ignorer la query string (ex: /?autorun=1).
+            path = urlparse(self.path).path
+            if path in ("/", "/index.html"):
                 body = INDEX_HTML.read_bytes()
                 self.send_response(200)
                 self.send_header("Content-Type", "text/html; charset=utf-8")
                 self.send_header("Content-Length", str(len(body)))
                 self.end_headers()
                 self.wfile.write(body)
-            elif self.path == "/api/info":
+            elif path == "/api/info":
                 self._send_json(info)
             else:
                 self.send_error(404)

@@ -1,0 +1,4 @@
+# Normalise les fins de ligne : LF dans le dépôt, natif dans le working tree.
+* text=auto
+*.png binary
+*.pt binary

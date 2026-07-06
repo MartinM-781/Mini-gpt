@@ -1,0 +1,17 @@
+# Environnement virtuel
+.venv/
+venv/
+
+# Bytecode Python
+__pycache__/
+*.py[cod]
+
+# Artefacts d'entraînement (régénérés par train.py)
+checkpoints/
+
+# IDE / OS / outils locaux
+.idea/
+.vscode/
+.claude/
+.DS_Store
+Thumbs.db

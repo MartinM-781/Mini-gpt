@@ -1,6 +1,6 @@
 # mini-gpt
 
-[![CI](https://github.com/OWNER/mini-gpt/actions/workflows/ci.yml/badge.svg)](https://github.com/OWNER/mini-gpt/actions/workflows/ci.yml)
+[![CI](https://github.com/MartinM-781/Mini-gpt/actions/workflows/ci.yml/badge.svg)](https://github.com/MartinM-781/Mini-gpt/actions/workflows/ci.yml)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.0%2B-ee4c2c.svg)](https://pytorch.org/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
@@ -33,8 +33,8 @@ commenté en français : le code se lit comme un cours.
 ## Démarrage rapide
 
 ```bash
-git clone https://github.com/OWNER/mini-gpt.git
-cd mini-gpt
+git clone https://github.com/MartinM-781/Mini-gpt.git
+cd Mini-gpt
 python -m venv .venv
 .venv\Scripts\Activate.ps1        # Windows — ou : source .venv/bin/activate
 pip install -r requirements.txt

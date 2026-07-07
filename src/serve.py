@@ -1,7 +1,6 @@
 """serve.py - mini playground web pour le Mini-GPT (stdlib uniquement).
 
-Usage :
-    cd C:\\dev\\mini-gpt
+Usage (depuis la racine du projet) :
     python src/serve.py                # http://127.0.0.1:8000
     python src/serve.py --port 8080
 
@@ -50,6 +49,9 @@ def make_handler(model, tokenizer, meta: dict):
         "n_head": model.config.n_head,
         "n_embd": model.config.n_embd,
     }
+    # Device réel du modèle : le tenseur du prompt doit être créé dessus,
+    # sinon RuntimeError au premier forward sur une machine CUDA.
+    device = next(model.parameters()).device
 
     class Handler(BaseHTTPRequestHandler):
         def _send_json(self, obj: dict, status: int = 200) -> None:
@@ -83,16 +85,25 @@ def make_handler(model, tokenizer, meta: dict):
             length = int(self.headers.get("Content-Length", 0))
             try:
                 payload = json.loads(self.rfile.read(length) or b"{}")
-            except json.JSONDecodeError:
+            except (json.JSONDecodeError, UnicodeDecodeError):
                 self._send_json({"error": "JSON invalide"}, status=400)
                 return
+            if not isinstance(payload, dict):
+                self._send_json({"error": "objet JSON attendu"}, status=400)
+                return
 
-            prompt = payload.get("prompt") or "\n"
-            max_new_tokens = int(clamp(int(payload.get("max_new_tokens", 300)), 1, 2000))
-            temperature = clamp(float(payload.get("temperature", 0.8)), 0.05, 3.0)
-            top_k = payload.get("top_k") or None
-            if top_k is not None:
-                top_k = int(clamp(int(top_k), 1, tokenizer.vocab_size))
+            # Coercition défensive : un client curl/script peut envoyer
+            # n'importe quoi ; on répond 400 plutôt que de tuer le thread.
+            try:
+                prompt = str(payload.get("prompt") or "\n")
+                max_new_tokens = int(clamp(int(payload.get("max_new_tokens", 300)), 1, 2000))
+                temperature = clamp(float(payload.get("temperature", 0.8)), 0.05, 3.0)
+                top_k = payload.get("top_k") or None
+                if top_k is not None:
+                    top_k = int(clamp(int(top_k), 1, tokenizer.vocab_size))
+            except (TypeError, ValueError) as e:
+                self._send_json({"error": f"paramètre invalide : {e}"}, status=400)
+                return
 
             # Encoder le prompt ; 400 explicite si un caractère est inconnu.
             try:
@@ -100,7 +111,7 @@ def make_handler(model, tokenizer, meta: dict):
             except KeyError as e:
                 self._send_json({"error": str(e)}, status=400)
                 return
-            idx = torch.tensor([idx_list], dtype=torch.long)
+            idx = torch.tensor([idx_list], dtype=torch.long, device=device)
 
             # Réponse streamée : pas de Content-Length, le client lit
             # jusqu'à la fermeture de la connexion (HTTP/1.0).
@@ -136,7 +147,14 @@ def main() -> None:
     args = parser.parse_args()
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    model, tokenizer, meta = load_checkpoint(args.ckpt, args.vocab, device)
+    try:
+        model, tokenizer, meta = load_checkpoint(args.ckpt, args.vocab, device)
+    except FileNotFoundError as e:
+        print(
+            f"[serve] checkpoint introuvable : {e.filename}\n"
+            f"[serve] entraînez d'abord un modèle : python src/train.py --preset cpu-small"
+        )
+        raise SystemExit(1)
 
     server = ThreadingHTTPServer(
         (args.host, args.port), make_handler(model, tokenizer, meta)

@@ -1,7 +1,6 @@
 """sample.py - generation de texte avec un Mini-GPT entraine.
 
-Usage :
-    cd C:\\dev\\mini-gpt
+Usage (depuis la racine du projet) :
     python src/sample.py --prompt "Le chat" --max_new_tokens 200 --temperature 0.8 --top_k 40
 
 Recharge le checkpoint le plus recent dans `checkpoints/ckpt.pt` et le

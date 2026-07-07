@@ -1,7 +1,6 @@
 """train.py - boucle d'entraînement du Mini-GPT.
 
-Usage standard :
-    cd C:\\dev\\mini-gpt
+Usage standard (depuis la racine du projet) :
     python src/train.py --preset cpu-small      # premier run rapide sur CPU
     python src/train.py --preset cpu-medium     # ~30 min sur CPU, meilleure loss
     python src/train.py --preset gpu            # config complète (GPU conseillé)

@@ -238,7 +238,7 @@
         const text = decoder.decode(value, { stream: true });
         count += text.length;
         genSpan.textContent += text;
-        output.parentElement.scrollTop = output.parentElement.scrollHeight;
+        caret.scrollIntoView({ block: "nearest" });  // suivre la génération
         const dt = (performance.now() - t0) / 1000;
         $("status").textContent =
           `${count} tokens · ${dt.toFixed(1)}s · ${(count / dt).toFixed(1)} tok/s`;

@@ -14,8 +14,9 @@ in ~20 minutes on a laptop CPU.
 
 The goal is to understand every component of a GPT by rebuilding it by hand:
 tokenizer, causal multi-head attention, pre-norm residual blocks, training loop,
-LR scheduling, sampling. Every file is extensively commented (in French — the
-project doubles as French-language teaching material).
+LR scheduling, sampling. Every design choice is motivated inline — the code, tests,
+and this README stand on their own in English; the inline comments are additionally
+written in French, so the repo doubles as French-language teaching material.
 
 ![playground screenshot](assets/playground.png)
 

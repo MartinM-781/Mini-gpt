@@ -266,11 +266,20 @@ class GPT(nn.Module):
         Args:
             idx: (B, T_in) tokens d'amorce (le prompt encodé).
             max_new_tokens: nombre de tokens à générer.
-            temperature: < 1 plus déterministe, > 1 plus aléatoire.
+            temperature: < 1 plus déterministe, > 1 plus aléatoire. Doit être > 0.
             top_k: si donné, on ne sample que parmi les k tokens les + probables.
+                   0 ou None = désactivé.
         Yields:
             (B, 1) : l'id du token fraîchement échantillonné.
         """
+        assert idx.size(1) > 0, (
+            "generate_stream exige au moins un token d'amorce (le modèle "
+            "prédit le token SUIVANT ; utiliser '\\n' comme amorce neutre)."
+        )
+        assert temperature > 0, (
+            f"temperature doit être > 0 (reçu {temperature}). Pour du greedy "
+            f"quasi-déterministe, utiliser une petite valeur (ex: 0.1) ou top_k=1."
+        )
         was_training = self.training
         self.eval()
         try:
@@ -287,7 +296,8 @@ class GPT(nn.Module):
                 # Ne garder que la dernière position (c'est le next-token).
                 logits = logits[:, -1, :] / temperature  # (B, V)
                 # Filtrage top-k (optionnel) : -inf aux tokens hors top-k.
-                if top_k is not None:
+                # `if top_k` : None et 0 signifient tous deux "désactivé".
+                if top_k:
                     v, _ = torch.topk(logits, min(top_k, logits.size(-1)))
                     logits[logits < v[:, [-1]]] = float("-inf")
                 # Softmax -> probas -> sampling multinomial.

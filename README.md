@@ -28,7 +28,7 @@ project doubles as French-language teaching material).
 | [`train.py`](src/train.py) | AdamW with selective weight decay (2-D params only), linear warmup + cosine decay, gradient clipping, best-checkpoint saving, CSV metrics |
 | [`sample.py`](src/sample.py) | Temperature + top-k sampling, **streaming generation** (token-by-token generator) |
 | [`serve.py`](src/serve.py) | Web playground with live token streaming — stdlib `http.server` only, zero web dependencies |
-| [`tests/`](tests/) | 25 pytest tests (causality, shapes, init statistics, weight tying, LR schedule, streaming) — run in CI |
+| [`tests/`](tests/) | 31 pytest tests (causality, shapes, init statistics, weight tying, LR schedule, streaming, edge cases) — run in CI |
 
 ## Quickstart
 

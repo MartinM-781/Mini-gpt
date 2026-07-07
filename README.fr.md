@@ -28,7 +28,7 @@ commenté en français : le code se lit comme un cours.
 | [`train.py`](src/train.py) | AdamW avec weight decay sélectif (params 2D uniquement), warmup linéaire + cosine decay, gradient clipping, sauvegarde du meilleur checkpoint, métriques CSV |
 | [`sample.py`](src/sample.py) | Échantillonnage température + top-k, **génération en streaming** (générateur token par token) |
 | [`serve.py`](src/serve.py) | Playground web avec streaming des tokens en direct — `http.server` de la stdlib, zéro dépendance web |
-| [`tests/`](tests/) | 25 tests pytest (causalité, shapes, statistiques d'init, weight tying, LR schedule, streaming) — exécutés en CI |
+| [`tests/`](tests/) | 31 tests pytest (causalité, shapes, statistiques d'init, weight tying, LR schedule, streaming, cas limites) — exécutés en CI |
 
 ## Démarrage rapide
 

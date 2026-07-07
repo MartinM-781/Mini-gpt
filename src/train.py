@@ -2,8 +2,8 @@
 
 Usage standard :
     cd C:\\dev\\mini-gpt
-    python src/train.py --preset cpu-small      # ~25 min sur CPU
-    python src/train.py --preset cpu-medium     # ~1h30 sur CPU, meilleure loss
+    python src/train.py --preset cpu-small      # premier run rapide sur CPU
+    python src/train.py --preset cpu-medium     # ~30 min sur CPU, meilleure loss
     python src/train.py --preset gpu            # config complète (GPU conseillé)
 
 Suppose qu'un corpus existe à `data/input.txt`. Sauvegarde :
@@ -27,16 +27,17 @@ from dataset import CharDataset
 from model import GPT
 from tokenizer import CharTokenizer
 
-# Presets : un compromis taille/temps par machine cible. Tous partagent le
-# même LR schedule (warmup 200 iters, cosine decay vers min_lr).
+# Presets : un compromis taille/temps par machine cible. Les presets cpu-*
+# rallongent le warmup à 200 iters ; gpu garde les defaults de GPTConfig.
 PRESETS: dict[str, dict] = {
-    # Petit modèle, ~25 min sur un CPU portable. val_loss ~1.85.
+    # Petit modèle, premier run rapide sur CPU portable. val_loss ≈ 1.9.
     "cpu-small": dict(
         n_layer=4, n_head=4, n_embd=128, block_size=64,
         batch_size=16, max_iters=4000, eval_interval=400, eval_iters=50,
         warmup_iters=200, device="cpu",
     ),
-    # Architecture complète mais contexte réduit, ~1h30 sur CPU. val_loss ~1.75.
+    # Architecture complète mais contexte réduit, ~30 min sur CPU portable.
+    # val_loss 1.88 (seedé : deux runs identiques donnent le même résultat).
     "cpu-medium": dict(
         n_layer=6, n_head=6, n_embd=192, block_size=96,
         batch_size=12, max_iters=3000, eval_interval=300, eval_iters=50,
@@ -45,6 +46,17 @@ PRESETS: dict[str, dict] = {
     # Config complète (defaults de GPTConfig). Quelques minutes sur GPU.
     "gpu": dict(),
 }
+
+
+def resolve_device(requested: str) -> str:
+    """Downgrade cuda -> cpu si indisponible ; ne force JAMAIS cuda.
+
+    Un utilisateur qui demande explicitement --device cpu sur une machine
+    équipée d'un GPU doit être respecté (debug, benchmark, VRAM occupée).
+    """
+    if requested == "cuda" and not torch.cuda.is_available():
+        return "cpu"
+    return requested
 
 
 def get_lr(it: int, config: GPTConfig) -> float:
@@ -132,11 +144,8 @@ def main(config: GPTConfig | None = None) -> None:
     if config is None:
         config = GPTConfig()
 
-    # ----- Device auto-detect -----
-    if torch.cuda.is_available():
-        config.device = "cuda"
-    elif config.device == "cuda":  # demandé cuda mais indisponible
-        config.device = "cpu"
+    # ----- Device : respecter le choix explicite, downgrade si cuda absent -----
+    config.device = resolve_device(config.device)
     print(f"device = {config.device}")
 
     # ----- Seed -----

@@ -119,6 +119,25 @@ def test_generate_matches_stream_with_same_seed(model):
     assert torch.equal(full, streamed)
 
 
+def test_generate_top_k_zero_means_disabled(model):
+    # top_k=0 (slider UI à zéro) doit être traité comme top_k=None, pas planter.
+    start = torch.zeros((1, 1), dtype=torch.long)
+    out = model.generate(start, max_new_tokens=5, top_k=0)
+    assert out.shape == (1, 6)
+
+
+def test_generate_rejects_zero_temperature(model):
+    start = torch.zeros((1, 1), dtype=torch.long)
+    with pytest.raises(AssertionError, match="temperature"):
+        model.generate(start, max_new_tokens=1, temperature=0.0)
+
+
+def test_generate_rejects_empty_prompt(model):
+    empty = torch.zeros((1, 0), dtype=torch.long)
+    with pytest.raises(AssertionError, match="amorce"):
+        model.generate(empty, max_new_tokens=1)
+
+
 def test_generate_restores_training_mode(model):
     model.train()
     start = torch.zeros((1, 1), dtype=torch.long)

@@ -4,7 +4,7 @@ import torch
 
 from config import GPTConfig
 from model import GPT
-from train import PRESETS, configure_optimizer, get_lr
+from train import PRESETS, configure_optimizer, get_lr, resolve_device
 
 
 def _cfg(**kwargs):
@@ -52,6 +52,18 @@ def test_optimizer_decay_groups():
     n_opt = sum(p.numel() for g in optimizer.param_groups for p in g["params"])
     n_model = sum(p.numel() for p in model.parameters() if p.requires_grad)
     assert n_opt == n_model
+
+
+def test_resolve_device_respects_explicit_cpu():
+    # Un --device cpu explicite ne doit jamais être promu en cuda.
+    assert resolve_device("cpu") == "cpu"
+
+
+def test_resolve_device_downgrades_unavailable_cuda():
+    import torch
+
+    expected = "cuda" if torch.cuda.is_available() else "cpu"
+    assert resolve_device("cuda") == expected
 
 
 def test_presets_are_valid_configs():

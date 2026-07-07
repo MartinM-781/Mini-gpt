@@ -94,6 +94,10 @@ def main() -> None:
     device = "cuda" if torch.cuda.is_available() else "cpu"
     torch.manual_seed(args.seed)
 
+    # Prompt vide -> newline : le modèle exige au moins un token d'amorce.
+    if not args.prompt:
+        args.prompt = "\n"
+
     model, tokenizer, _ = load_checkpoint(args.ckpt, args.vocab, device)
 
     # Encoder le prompt. Erreur explicite si un char est absent du vocab.

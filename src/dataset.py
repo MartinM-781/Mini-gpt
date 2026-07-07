@@ -80,7 +80,14 @@ class CharDataset:
 
         # Positions de départ valides : il faut pouvoir lire block_size + 1
         # tokens à partir de ix (block_size pour x, +1 pour la cible finale de y).
-        ix = torch.randint(0, len(data) - self.block_size - 1, (self.batch_size,))
+        # Dernier départ valide : len(data) - block_size - 1, donc randint
+        # exclusif sur len(data) - block_size.
+        assert len(data) > self.block_size, (
+            f"split '{split}' trop court : {len(data)} tokens pour un "
+            f"block_size de {self.block_size}. Corpus trop petit ou "
+            f"train_split trop extrême."
+        )
+        ix = torch.randint(0, len(data) - self.block_size, (self.batch_size,))
 
         # Pour chaque position tirée, slice block_size tokens consécutifs,
         # puis stack en un tenseur 2D de forme (batch_size, block_size).

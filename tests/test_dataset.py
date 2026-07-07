@@ -39,3 +39,17 @@ def test_targets_are_inputs_shifted_by_one(dataset):
     x, y = dataset.get_batch("train")
     # Pour chaque ligne du batch : y[t] == x[t+1].
     assert torch.equal(x[:, 1:], y[:, :-1])
+
+
+def test_tiny_corpus_raises_clear_error(tmp_path):
+    # Un split plus court que block_size doit échouer avec un message clair,
+    # pas avec une RuntimeError cryptique de torch.randint.
+    tiny = "abc"
+    path = tmp_path / "tiny.txt"
+    path.write_text(tiny * 10, encoding="utf-8")  # 30 chars -> val = 3 chars
+    cfg = GPTConfig(batch_size=2, block_size=16, device="cpu")
+    tok = CharTokenizer.from_text(tiny)
+    cfg.vocab_size = tok.vocab_size
+    ds = CharDataset(path, tok, cfg)
+    with pytest.raises(AssertionError, match="trop court"):
+        ds.get_batch("val")

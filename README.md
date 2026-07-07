@@ -18,7 +18,7 @@ LR scheduling, sampling. Every design choice is motivated inline — the code, t
 and this README stand on their own in English; the inline comments are additionally
 written in French, so the repo doubles as French-language teaching material.
 
-![playground screenshot](assets/playground.png)
+![the web playground streaming a generation live — 500 tokens in ~5 s on a laptop CPU](assets/playground_demo.gif)
 
 ## What's inside
 

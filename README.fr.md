@@ -17,7 +17,7 @@ tokenizer, attention causale multi-têtes, blocs résiduels pré-norm, boucle
 d'entraînement, LR schedule, échantillonnage. Chaque fichier est abondamment
 commenté en français : le code se lit comme un cours.
 
-![capture du playground](assets/playground.png)
+![le playground web en train de streamer une génération — 500 tokens en ~5 s sur un CPU portable](assets/playground_demo.gif)
 
 ## Contenu
 
